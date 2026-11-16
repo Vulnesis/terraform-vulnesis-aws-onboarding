@@ -1,5 +1,7 @@
 # terraform-vulnetix-aws-onboarding
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Vulnetix/terraform-vulnetix-aws-onboarding)
+
 Connects an AWS account to Vulnetix. It deploys the same `vulnetix-security-bootstrap` CloudFormation stack the Vulnetix console deploys, which holds two things:
 
 - `vulnetix-cloudtrail-<account id>`: the CloudTrail log bucket, private and encrypted, writable only by this account's Vulnetix trail.
