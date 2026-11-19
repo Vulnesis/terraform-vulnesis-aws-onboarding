@@ -1,11 +1,11 @@
-# Copied from Vulnetix/vdb-site api/internal/handler/assets/aws-bootstrap.yaml
+# Copied from Vulnesis/vdb-site api/internal/handler/assets/aws-bootstrap.yaml
 # at 31eb7ac by scripts/sync-template.sh. Do not edit here: change it there and re-sync,
 # so this module and the console deploy the same stack.
 AWSTemplateFormatVersion: '2010-09-09'
 
 Description: >-
-  Vulnetix security logging — bootstrap. Creates the CloudTrail log bucket and
-  the cross-account role Vulnetix assumes to read this account. Deployed with
+  Vulnesis security logging — bootstrap. Creates the CloudTrail log bucket and
+  the cross-account role Vulnesis assumes to read this account. Deployed with
   the operator's IAM Identity Center credentials, because the role it creates is
   the thing everything afterwards depends on.
 
@@ -13,18 +13,18 @@ Parameters:
   ExternalId:
     Type: String
     Description: >-
-      The Vulnetix organisation uuid. Required in sts:ExternalId on every
+      The Vulnesis organisation uuid. Required in sts:ExternalId on every
       assume, so a third party who learns the role ARN still cannot use it.
     AllowedPattern: '^[A-Za-z0-9-]{8,64}$'
 
   VulnetixAccountId:
     Type: String
     Default: '061882422009'
-    Description: The AWS account whose Vulnetix service assumes the role below.
+    Description: The AWS account whose Vulnesis service assumes the role below.
     AllowedPattern: '^[0-9]{12}$'
 
 Resources:
-  # CloudTrail's delivery target. Named after the account so a Vulnetix bucket
+  # CloudTrail's delivery target. Named after the account so a Vulnesis bucket
   # is recognisable in a console listing and cannot collide globally.
   LogBucket:
     Type: AWS::S3::Bucket
@@ -44,7 +44,7 @@ Resources:
           - ObjectOwnership: BucketOwnerEnforced
 
   # The two statements CloudTrail requires, both pinned to this account's own
-  # Vulnetix trail via aws:SourceArn — without that condition any trail in any
+  # Vulnesis trail via aws:SourceArn — without that condition any trail in any
   # account could write here.
   LogBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -73,7 +73,7 @@ Resources:
               StringEquals:
                 aws:SourceArn: !Sub 'arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/vulnetix-management-events'
 
-  # The role Vulnetix assumes for everything after this stack: deploying the
+  # The role Vulnesis assumes for everything after this stack: deploying the
   # pipeline stack, uploading the probe bundle, and verifying log access.
   #
   # Its permissions are the union of what those operations need. They are
@@ -84,7 +84,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: VulnetixSecurityAuditor
-      Description: Lets Vulnetix deploy and read its security logging pipeline in this account.
+      Description: Lets Vulnesis deploy and read its security logging pipeline in this account.
       MaxSessionDuration: 43200
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -101,7 +101,7 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              # CloudFormation, scoped to the two stacks Vulnetix owns. The
+              # CloudFormation, scoped to the two stacks Vulnesis owns. The
               # account-wide read actions have no resource form.
               - Sid: CloudFormationStacks
                 Effect: Allow
@@ -115,7 +115,7 @@ Resources:
                   - cloudformation:DescribeStackResources
                   - cloudformation:GetTemplate
                   - cloudformation:GetTemplateSummary
-                  # Drift detection is how the Vulnetix console answers "has
+                  # Drift detection is how the Vulnesis console answers "has
                   # anything in this account been changed underneath us" without
                   # asking the customer to look.
                   - cloudformation:DetectStackDrift
@@ -225,7 +225,7 @@ Resources:
               # Lambda has no meaningful resource-level control for the create
               # path, so this is action-scoped rather than resource-scoped.
               #
-              # InvokeFunction is here so Vulnetix support can run the probe on
+              # InvokeFunction is here so Vulnesis support can run the probe on
               # demand. On a quiet account there may be no qualifying API
               # activity for hours, and "wait and see" is not a diagnosis. The
               # probe only reads, so an invocation cannot change anything.
@@ -325,5 +325,5 @@ Outputs:
     Value: !Ref LogBucket
 
   AuditorRoleArn:
-    Description: The role Vulnetix assumes to read this account.
+    Description: The role Vulnesis assumes to read this account.
     Value: !GetAtt AuditorRole.Arn

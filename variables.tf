@@ -1,15 +1,15 @@
 variable "external_id" {
-  description = "Your Vulnetix tenant (organisation) uuid. The role only trusts an sts:AssumeRole that carries it as the external ID, so a third party who learns the role ARN still cannot use it."
+  description = "Your Vulnesis tenant (organisation) uuid. The role only trusts an sts:AssumeRole that carries it as the external ID, so a third party who learns the role ARN still cannot use it."
   type        = string
 
   validation {
     condition     = can(regex("^[A-Za-z0-9-]{8,64}$", var.external_id))
-    error_message = "The external_id must be your Vulnetix tenant uuid: 8 to 64 letters, digits and hyphens."
+    error_message = "The external_id must be your Vulnesis tenant uuid: 8 to 64 letters, digits and hyphens."
   }
 }
 
 variable "vulnetix_account_id" {
-  description = "The AWS account the Vulnetix service runs in and assumes the role from. Change it only when Vulnetix support asks you to."
+  description = "The AWS account the Vulnesis service runs in and assumes the role from. Change it only when Vulnesis support asks you to."
   type        = string
   default     = "061882422009"
 

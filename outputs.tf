@@ -1,10 +1,10 @@
 output "auditor_role_arn" {
-  description = "The VulnetixSecurityAuditor role Vulnetix assumes. Give it, with the account id, to the Vulnetix console's AWS integration."
+  description = "The VulnetixSecurityAuditor role Vulnesis assumes. Give it, with the account id, to the Vulnesis console's AWS integration."
   value       = aws_cloudformation_stack.bootstrap.outputs["AuditorRoleArn"]
 }
 
 output "log_bucket_name" {
-  description = "The bucket CloudTrail delivers into and the Vulnetix probe bundle is staged in."
+  description = "The bucket CloudTrail delivers into and the Vulnesis probe bundle is staged in."
   value       = aws_cloudformation_stack.bootstrap.outputs["LogBucketName"]
 }
 

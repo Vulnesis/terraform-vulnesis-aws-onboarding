@@ -1,5 +1,5 @@
-# Only the required input: your Vulnetix tenant uuid. From the registry, use
-# source = "Vulnetix/aws-onboarding/vulnetix" with a version.
+# Only the required input: your Vulnesis tenant uuid. From the registry, use
+# source = "Vulnesis/aws-onboarding/vulnetix" with a version.
 
 provider "aws" {
   region = "us-east-1"

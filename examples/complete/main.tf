@@ -1,6 +1,6 @@
 # Every input, with the tenant uuid from a variable and every output exported
-# for the Vulnetix console's AWS integration. From the registry, use
-# source = "Vulnetix/aws-onboarding/vulnetix" with a version.
+# for the Vulnesis console's AWS integration. From the registry, use
+# source = "Vulnesis/aws-onboarding/vulnetix" with a version.
 
 provider "aws" {
   region = "eu-west-1"

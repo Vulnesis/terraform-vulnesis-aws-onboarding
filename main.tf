@@ -1,10 +1,10 @@
-# The Vulnetix AWS onboarding bootstrap: the CloudTrail log bucket and the
-# VulnetixSecurityAuditor role Vulnetix assumes, as the same CloudFormation
+# The Vulnesis AWS onboarding bootstrap: the CloudTrail log bucket and the
+# VulnetixSecurityAuditor role Vulnesis assumes, as the same CloudFormation
 # stack the console deploys (templates/aws-bootstrap.yaml).
 #
 # The stack name is fixed. The console finds its progress by stack name, the
-# role's own policy only lets Vulnetix manage the stacks named
-# vulnetix-security-bootstrap and vulnetix-security-pipeline, and Vulnetix
+# role's own policy only lets Vulnesis manage the stacks named
+# vulnetix-security-bootstrap and vulnetix-security-pipeline, and Vulnesis
 # deploys the pipeline stack itself, through the role, once this one exists.
 # So an account has one of these, in the region its trail should log from.
 
