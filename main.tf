@@ -22,6 +22,7 @@ resource "aws_cloudformation_stack" "bootstrap" {
   parameters = {
     ExternalId        = var.external_id
     VulnetixAccountId = var.vulnetix_account_id
+    TrustMode         = var.trust_mode
   }
 
   tags = local.tags

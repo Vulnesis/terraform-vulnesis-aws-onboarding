@@ -19,6 +19,17 @@ variable "vulnetix_account_id" {
   }
 }
 
+variable "trust_mode" {
+  description = "How the role is trusted. \"account\": the AWS account in vulnetix_account_id assumes it with your external ID (Vulnetix). \"oidc\": Vulnesis, which runs without an AWS account, presents a short-lived token from its OIDC issuer https://sts.vulnes.is; the stack creates that IAM OIDC provider and the role only accepts tokens whose subject is your external ID."
+  type        = string
+  default     = "account"
+
+  validation {
+    condition     = contains(["account", "oidc"], var.trust_mode)
+    error_message = "The trust_mode must be \"account\" or \"oidc\"."
+  }
+}
+
 variable "tags" {
   description = "Tags for the CloudFormation stack. CloudFormation copies them onto every resource the stack creates."
   type        = map(string)

@@ -1,5 +1,5 @@
 # Copied from Vulnesis/vdb-site api/internal/handler/assets/aws-bootstrap.yaml
-# at 31eb7ac by scripts/sync-template.sh. Do not edit here: change it there and re-sync,
+# at 5e1379d by scripts/sync-template.sh. Do not edit here: change it there and re-sync,
 # so this module and the console deploy the same stack.
 AWSTemplateFormatVersion: '2010-09-09'
 
@@ -23,7 +23,29 @@ Parameters:
     Description: The AWS account whose Vulnesis service assumes the role below.
     AllowedPattern: '^[0-9]{12}$'
 
+  TrustMode:
+    Type: String
+    Default: account
+    AllowedValues: [account, oidc]
+    Description: >-
+      account: the role trusts the AWS account VulnetixAccountId, with the
+      external id. oidc: the role trusts the sts.vulnes.is OIDC issuer, with the
+      token's sub equal to ExternalId, for a service that has no AWS account to
+      assume the role from.
+
+Conditions:
+  TrustOidc: !Equals [!Ref TrustMode, oidc]
+
 Resources:
+  # The issuer whose short-lived tokens Vulnesis presents to STS
+  # AssumeRoleWithWebIdentity (TrustMode oidc only).
+  VulnesisOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: TrustOidc
+    Properties:
+      Url: https://sts.vulnes.is
+      ClientIdList: [sts.amazonaws.com]
+
   # CloudTrail's delivery target. Named after the account so a Vulnesis bucket
   # is recognisable in a console listing and cannot collide globally.
   LogBucket:
@@ -89,13 +111,23 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:${AWS::Partition}:iam::${VulnetixAccountId}:root'
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Ref ExternalId
+          - !If
+            - TrustOidc
+            - Effect: Allow
+              Principal:
+                Federated: !Ref VulnesisOidcProvider
+              Action: sts:AssumeRoleWithWebIdentity
+              Condition:
+                StringEquals:
+                  'sts.vulnes.is:aud': sts.amazonaws.com
+                  'sts.vulnes.is:sub': !Ref ExternalId
+            - Effect: Allow
+              Principal:
+                AWS: !Sub 'arn:${AWS::Partition}:iam::${VulnetixAccountId}:root'
+              Action: sts:AssumeRole
+              Condition:
+                StringEquals:
+                  sts:ExternalId: !Ref ExternalId
       Policies:
         - PolicyName: VulnetixSecurityAuditPolicy
           PolicyDocument:

@@ -2,7 +2,7 @@
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Vulnesis/terraform-vulnetix-aws-onboarding)
 
-Connects an AWS account to Vulnetix. It deploys the same `vulnetix-security-bootstrap` CloudFormation stack the Vulnesis console deploys, which holds two things:
+Connects an AWS account to Vulnesis. It deploys the same `vulnetix-security-bootstrap` CloudFormation stack the Vulnesis console deploys, which holds two things:
 
 - `vulnetix-cloudtrail-<account id>`: the CloudTrail log bucket, private and encrypted, writable only by this account's Vulnesis trail.
 - `VulnetixSecurityAuditor`: the role Vulnesis assumes. It trusts only the Vulnesis AWS account, and only with your tenant uuid as the external ID.
@@ -31,12 +31,29 @@ One account has one bootstrap stack. Deploy it in the region the trail should lo
 - [examples/minimal](examples/minimal): the required input only.
 - [examples/complete](examples/complete): every input and output.
 
+## Trust
+
+Vulnesis runs without an AWS account of its own, so set `trust_mode = "oidc"`:
+the role then trusts the Vulnesis OIDC issuer instead of an AWS account, and
+Vulnesis reaches it with `sts:AssumeRoleWithWebIdentity`. The confused-deputy
+guard is unchanged in substance: a token is accepted only when its subject is
+your tenant uuid, the value `external_id` carries.
+
+```hcl
+module "vulnesis" {
+  source      = "Vulnesis/aws-onboarding/vulnetix"
+  external_id = "<your tenant uuid>"
+  trust_mode  = "oidc"
+}
+```
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | `external_id` | Your Vulnesis tenant (organisation) uuid. The role only trusts an assume that carries it as the external ID. | `string` | n/a | yes |
 | `vulnetix_account_id` | The AWS account the Vulnesis service assumes the role from. Change it only when Vulnesis support asks you to. | `string` | `"061882422009"` | no |
+| `trust_mode` | `"oidc"` for Vulnesis: the role trusts the Vulnesis OIDC issuer `https://sts.vulnes.is` (the stack creates the IAM OIDC provider) and accepts only tokens whose subject is your external ID. `"account"` trusts `vulnetix_account_id` with the external ID. | `string` | `"account"` | no |
 | `tags` | Tags for the stack. CloudFormation copies them onto every resource it creates. `ManagedBy = "terraform"` is always added. | `map(string)` | `{}` | no |
 | `timeout_minutes` | How long to wait for the stack to create, update or delete. | `number` | `30` | no |
 
